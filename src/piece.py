@@ -1,82 +1,46 @@
+from player import Player
 class Piece:
     def __init__(self, color, type, position):
         self.color = color
         self.type = type
         self.position = position
+        self.is_alive = True
 
     def __str__(self):
-        return f"This is a {self.color.capitalize()} {self.type.capitalize()} at position {self.position}"
-    
-    def move(self, new_position):
-        self.position = new_position
-        print(f"{self.color.capitalize()} {self.type.capitalize()} moved to {self.position}")
-    
-    def capture(self, piece):
-        pass
-
-class Pawn(Piece):
-    def __init__(self, color, position):
-        super().__init__(color, "pawn", position)
-
-    def move(self, new_position):
-        super().move(new_position)
-        print(f"{self.color.capitalize()} {self.type.capitalize()} moved to {self.position}")
-    
-    def capture(self, piece):
+        # child entities will override to print their symbol to the chessboard
         pass
 
 class Rook(Piece):
     def __init__(self, color, position):
-        super().__init__(color, "rook", position)
-
-    def move(self, new_position):
-        super().move(new_position)
-        print(f"{self.color.capitalize()} {self.type.capitalize()} moved to {self.position}")
+        super().__init__(color, "Rook", position)
     
-    def capture(self, piece):
-        pass
+    def __str__(self):
+        return("Ro")
 
 class Knight(Piece):
     def __init__(self, color, position):
-        super().__init__(color, "knight", position)
-
-    def move(self, new_position):
-        super().move(new_position)
-        print(f"{self.color.capitalize()} {self.type.capitalize()} moved to {self.position}")
+        super().__init__(color, "Knight", position)
     
-    def capture(self, piece):
-        pass
+    def __str__(self):
+        return("Kn")
 
 class Bishop(Piece):
     def __init__(self, color, position):
-        super().__init__(color, "bishop", position)
-
-    def move(self, new_position):
-        super().move(new_position)
-        print(f"{self.color.capitalize()} {self.type.capitalize()} moved to {self.position}")
+        super().__init__(color, "Bishop", position)
     
-    def capture(self, piece):
-        pass
+    def __str__(self):
+        return("Bi")
 
 class Queen(Piece):
     def __init__(self, color, position):
-        super().__init__(color, "queen", position)
-
-    def move(self, new_position):
-        super().move(new_position)
-        print(f"{self.color.capitalize()} {self.type.capitalize()} moved to {self.position}")
+        super().__init__(color, "Queen", position)
     
-    def capture(self, piece):
-        pass
+    def __str__(self):
+        return("Qu")
 
 class King(Piece):
     def __init__(self, color, position):
-        super().__init__(color, "king", position)
-
-    def move(self, new_position):
-        super().move(new_position)
-        print(f"{self.color.capitalize()} {self.type.capitalize()} moved to {self.position}")
+        super().__init__(color, "King", position)
     
-    def capture(self, piece):
-        pass
-
+    def __str__(self):
+        return("Ki")
