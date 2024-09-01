@@ -1,7 +1,5 @@
-from typing import Any
 from piece import *
 from player import Player
-from pprint import pprint
 class Board:
     def __init__(self):
         self.player1 = Player("white")
@@ -70,6 +68,9 @@ class Board:
                 else:
                     print(self.board[i][j], end=" ")
             print()
+    
+    def redraw_board(self):
+        self.__draw_board()
 
     def __create_pieces(self):
         pass
