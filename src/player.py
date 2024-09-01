@@ -13,8 +13,7 @@ class Player:
         self.turn = not self.turn
         other_player.turn = not other_player.turn
 
-    def make_move(self, board):
-        pass
+
 
     def __str__(self):
         return f"Current player is: {self.color.capitalize()}"

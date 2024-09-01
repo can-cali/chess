@@ -9,6 +9,32 @@ class Piece:
         # child entities will override to print their symbol to the chessboard
         pass
 
+    def is_valid_move(self, new_position, board):
+        # This method should be overridden by child classes
+        return False
+
+class Pawn(Piece):
+    def __init__(self, color, position):
+        super().__init__(color, "Pawn", position)
+    
+    def is_valid_move(self, new_position, board):
+        # Pawns can move one step forward
+        direction = 1 if self.color == "white" else -1
+        
+        # Normal move
+        if new_position[1] == self.position[1] and new_position[0] == self.position[0] + direction:
+            return board[new_position[0]][new_position[1]] is None
+
+        # Capture move
+        if abs(new_position[1] - self.position[1]) == 1 and new_position[0] == self.position[0] + direction:
+            target_piece = board[new_position[0]][new_position[1]]
+            return target_piece is not None and target_piece.color != self.color
+
+        return False
+    
+    def __str__(self):
+        return "Pw"
+    
 class Rook(Piece):
     def __init__(self, color, position):
         super().__init__(color, "Rook", position)
