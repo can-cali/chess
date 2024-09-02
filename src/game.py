@@ -28,7 +28,10 @@ class Game():
             target_piece = self.board.board[new_position[0]][new_position[1]]
             if target_piece is not None:
                 target_piece.is_alive = False
-                print(f"Captured {target_piece.color} {target_piece.type}")
+                print(f"{current_piece.color.capitalize()} {current_piece.type} at {chr(position[1] + ord('a'))}{8 - position[0]} Captured {target_piece.color.capitalize()} {target_piece.type} at {chr(new_position[1] + ord('a'))}{8 - new_position[0]}")
+                if target_piece.type == "King":
+                    print(f"{current_piece.color.capitalize()} Player wins!")
+                    return False
             
             # Update the board
             self.board.board[new_position[0]][new_position[1]] = current_piece
@@ -43,6 +46,9 @@ class Game():
             
             # Change turns
             self.board.player1.change_turn(self.board.player2)
+
+            # Inform about move
+            print(f"{current_piece.color.capitalize()} {current_piece.type} moved from {chr(position[1] + ord('a'))}{8 - position[0]} to {chr(new_position[1] + ord('a'))}{8 - new_position[0]}")
             
             # Redraw the board
             self.board.redraw_board()

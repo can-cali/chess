@@ -19,7 +19,12 @@ class Pawn(Piece):
     
     def is_valid_move(self, new_position, board):
         # Pawns can move one step forward
-        direction = 1 if self.color == "white" else -1
+        direction = 1 if self.color == "black" else -1
+
+        # Special move for the first move
+        if (self.position[0] == 1 and new_position[0] == 3 and new_position[1] == self.position[1] and board[2][self.position[1]] is None
+        or self.position[0] == 6 and new_position[0] == 4 and new_position[1] == self.position[1] and board[5][self.position[1]] is None):
+            return True
         
         # Normal move
         if new_position[1] == self.position[1] and new_position[0] == self.position[0] + direction:
@@ -39,32 +44,34 @@ class Rook(Piece):
     def __init__(self, color, position):
         super().__init__(color, "Rook", position)
     
-    def move(self, new_position):
+    def is_valid_move(self, new_position, board):
         # Rooks can move horizontally or vertically
-        # Check if the new position is in the same row or column
-        if new_position[0] == self.position[0] or new_position[1] == self.position[1]:
-            # Check if new position is not filled with a piece of the same color
-            if self.color == "white":
-                if self.board[new_position[0]][new_position[1]] is not None and self.board[new_position[0]][new_position[1]].color == "white":
-                    print("Invalid move. You can't kill your own piece.")
-                    return False
+        if new_position[1] == self.position[1] or new_position[0] == self.position[0]:
+            # Check if there is a piece in the path
+            if new_position[1] == self.position[1]:
+                start = min(new_position[0], self.position[0])
+                end = max(new_position[0], self.position[0])
+                for i in range(start + 1, end):
+                    if board[i][new_position[1]] is not None:
+                        return False
             else:
-                if self.board[new_position[0]][new_position[1]] is not None and self.board[new_position[0]][new_position[1]].color == "black":
-                    # If the new position is filled with a piece of the opposite color, kill it
-                    self.board[new_position[0]][new_position[1]].is_alive = False
-                    print(f"You killed a {self.board[new_position[0]][new_position[1]].color} {self.board[new_position[0]][new_position[1]].type}")
-
-            self.position = new_position
-
-            # Update the board
-            self.board[new_position[0]][new_position[1]] = self
-            self.board[self.position[0]][self.position[1]] = None
-            self.board.redraw()
-            
-            # Change turn
-            self.current_player.change_turn(self.other_player)
-
-            return True
+                start = min(new_position[1], self.position[1])
+                end = max(new_position[1], self.position[1])
+                for i in range(start + 1, end):
+                    if board[new_position[0]][i] is not None:
+                        return False
+            if new_position[0] == self.position[0]:
+                start = min(new_position[1], self.position[1])
+                end = max(new_position[1], self.position[1])
+                for i in range(start + 1, end):
+                    if board[new_position[0]][i] is not None:
+                        return False
+                    
+            # Check if there is a piece in the target position
+            target_piece = board[new_position[0]][new_position[1]]
+            if target_piece is not None: # If there is a piece in the target position
+                return target_piece.color != self.color # Capture move
+            return board[new_position[0]][new_position[1]] is None
         return False
     
     def __str__(self):
@@ -77,33 +84,22 @@ class Knight(Piece):
     def __str__(self):
         return("Kn")
 
-    def move(self, new_position):
+    def is_valid_move(self, new_position, board):
         # Knights can move in an L shape
-        # Check if the new position is in an L shape
-        if (abs(new_position[0] - self.position[0]) == 2 and abs(new_position[1] - self.position[1]) == 1) or (abs(new_position[0] - self.position[0]) == 1 and abs(new_position[1] - self.position[1]) == 2):
+        if abs(new_position[0] - self.position[0]) == 2 and abs(new_position[1] - self.position[1]) == 1:
             # Check if new position is not filled with a piece of the same color
-            if self.color == "white":
-                if self.board[new_position[0]][new_position[1]] is not None and self.board[new_position[0]][new_position[1]].color == "white":
-                    print("Invalid move. You can't kill your own piece.")
-                    return False
-            else:
-                if self.board[new_position[0]][new_position[1]] is not None and self.board[new_position[0]][new_position[1]].color == "black":
-                    # If the new position is filled with a piece of the opposite color, kill it
-                    self.board[new_position[0]][new_position[1]].is_alive = False
-                    print(f"You killed a {self.board[new_position[0]][new_position[1]].color} {self.board[new_position[0]][new_position[1]].type}")
-
-            self.position = new_position
-
-            # Update the board
-            self.board[new_position[0]][new_position[1]] = self
-            self.board[self.position[0]][self.position[1]] = None
-            self.board.redraw()
-            
-            # Change turn
-            self.current_player.change_turn(self.other_player)
-
+            target_piece = board[new_position[0]][new_position[1]]
+            if target_piece is not None:
+                return target_piece.color != self.color
+            return True
+        if abs(new_position[0] - self.position[0]) == 1 and abs(new_position[1] - self.position[1]) == 2:
+            # Check if new position is not filled with a piece of the same color
+            target_piece = board[new_position[0]][new_position[1]]
+            if target_piece is not None:
+                return target_piece.color != self.color
             return True
         return False
+        
 
 class Bishop(Piece):
     def __init__(self, color, position):
@@ -112,33 +108,32 @@ class Bishop(Piece):
     def __str__(self):
         return("Bi")
     
-    def move(self, new_position):
-        # Bishop can move diagonally
-        # Check if the new position is in the same diagonal
+    def is_valid_move(self, new_position, board):
+        # Bishops can move diagonally
         if abs(new_position[0] - self.position[0]) == abs(new_position[1] - self.position[1]):
-            # Check if new position is not filled with a piece of the same color
-            if self.color == "white":
-                if self.board[new_position[0]][new_position[1]] is not None and self.board[new_position[0]][new_position[1]].color == "white":
-                    print("Invalid move. You can't kill your own piece.")
-                    return False
+            # Check if there is a piece in the path
+            if new_position[0] > self.position[0] and new_position[1] > self.position[1]:
+                for i in range(1, new_position[0] - self.position[0]):
+                    if board[self.position[0] + i][self.position[1] + i] is not None:
+                        return False
+            elif new_position[0] > self.position[0] and new_position[1] < self.position[1]:
+                for i in range(1, new_position[0] - self.position[0]):
+                    if board[self.position[0] + i][self.position[1] - i] is not None:
+                        return False
+            elif new_position[0] < self.position[0] and new_position[1] > self.position[1]:
+                for i in range(1, self.position[0] - new_position[0]):
+                    if board[self.position[0] - i][self.position[1] + i] is not None:
+                        return False
             else:
-                if self.board[new_position[0]][new_position[1]] is not None and self.board[new_position[0]][new_position[1]].color == "black":
-                    # If the new position is filled with a piece of the opposite color, kill it
-                    self.board[new_position[0]][new_position[1]].is_alive = False
-                    print(f"You killed a {self.board[new_position[0]][new_position[1]].color} {self.board[new_position[0]][new_position[1]].type}")
-
-            self.position = new_position
-
-            # Update the board
-            self.board[new_position[0]][new_position[1]] = self
-            self.board[self.position[0]][self.position[1]] = None
-            self.board.redraw()
-            
-            # Change turn
-            self.current_player.change_turn(self.other_player)
-
+                for i in range(1, self.position[0] - new_position[0]):
+                    if board[self.position[0] - i][self.position[1] - i] is not None:
+                        return False
+            # Check if new position is not filled with a piece of the same color
+            # Capture move
+            target_piece = board[new_position[0]][new_position[1]]
+            if target_piece is not None:
+                return target_piece.color != self.color
             return True
-        return False
 
 class Queen(Piece):
     def __init__(self, color, position):
@@ -147,31 +142,59 @@ class Queen(Piece):
     def __str__(self):
         return("Qu")
     
-    def move(self, new_position):
-        # Queens can move horizontally, vertically or diagonally
-        # Check if the new position is in the same row, column or diagonal
-        if abs(new_position[0] - self.position[0]) == abs(new_position[1] - self.position[1]) or new_position[0] == self.position[0] or new_position[1] == self.position[1]:
-            # Check if new position is not filled with a piece of the same color
-            if self.color == "white":
-                if self.board[new_position[0]][new_position[1]] is not None and self.board[new_position[0]][new_position[1]].color == "white":
-                    print("Invalid move. You can't kill your own piece.")
-                    return False
+    def is_valid_move(self, new_position, board):
+        # Queens can move horizontally or vertically
+        if new_position[1] == self.position[1] or new_position[0] == self.position[0]:
+            # Check if there is a piece in the path
+            if new_position[1] == self.position[1]:
+                start = min(new_position[0], self.position[0])
+                end = max(new_position[0], self.position[0])
+                for i in range(start + 1, end):
+                    if board[i][new_position[1]] is not None:
+                        return False
             else:
-                if self.board[new_position[0]][new_position[1]] is not None and self.board[new_position[0]][new_position[1]].color == "black":
-                    # If the new position is filled with a piece of the opposite color, kill it
-                    self.board[new_position[0]][new_position[1]].is_alive = False
-                    print(f"You killed a {self.board[new_position[0]][new_position[1]].color} {self.board[new_position[0]][new_position[1]].type}")
+                start = min(new_position[1], self.position[1])
+                end = max(new_position[1], self.position[1])
+                for i in range(start + 1, end):
+                    if board[new_position[0]][i] is not None:
+                        return False
+            if new_position[0] == self.position[0]:
+                start = min(new_position[1], self.position[1])
+                end = max(new_position[1], self.position[1])
+                for i in range(start + 1, end):
+                    if board[new_position[0]][i] is not None:
+                        return False
+                    
+            # Check if there is a piece in the target position
+            target_piece = board[new_position[0]][new_position[1]]
+            if target_piece is not None: # If there is a piece in the target position
+                return target_piece.color != self.color # Capture move
+            return board[new_position[0]][new_position[1]] is None
 
-            self.position = new_position
-
-            # Update the board
-            self.board[new_position[0]][new_position[1]] = self
-            self.board[self.position[0]][self.position[1]] = None
-            self.board.redraw()
-            
-            # Change turn
-            self.current_player.change_turn(self.other_player)
-
+        # Queens can move diagonally
+        if abs(new_position[0] - self.position[0]) == abs(new_position[1] - self.position[1]):
+            # Check if there is a piece in the path
+            if new_position[0] > self.position[0] and new_position[1] > self.position[1]:
+                for i in range(1, new_position[0] - self.position[0]):
+                    if board[self.position[0] + i][self.position[1] + i] is not None:
+                        return False
+            elif new_position[0] > self.position[0] and new_position[1] < self.position[1]:
+                for i in range(1, new_position[0] - self.position[0]):
+                    if board[self.position[0] + i][self.position[1] - i] is not None:
+                        return False
+            elif new_position[0] < self.position[0] and new_position[1] > self.position[1]:
+                for i in range(1, self.position[0] - new_position[0]):
+                    if board[self.position[0] - i][self.position[1] + i] is not None:
+                        return False
+            else:
+                for i in range(1, self.position[0] - new_position[0]):
+                    if board[self.position[0] - i][self.position[1] - i] is not None:
+                        return False
+            # Check if new position is not filled with a piece of the same color
+            # Capture move
+            target_piece = board[new_position[0]][new_position[1]]
+            if target_piece is not None:
+                return target_piece.color != self.color
             return True
         return False
 
@@ -182,30 +205,16 @@ class King(Piece):
     def __str__(self):
         return("Ki")
     
-    def move(self, new_position):
-        # Kings can move horizontally, vertically or diagonally
-        # Check if the new position is in the same row, column or diagonal
-        if abs(new_position[0] - self.position[0]) == abs(new_position[1] - self.position[1]) or new_position[0] == self.position[0] or new_position[1] == self.position[1]:
-            # Check if new position is not filled with a piece of the same color
-            if self.color == "white":
-                if self.board[new_position[0]][new_position[1]] is not None and self.board[new_position[0]][new_position[1]].color == "white":
-                    print("Invalid move. You can't kill your own piece.")
-                    return False
-            else:
-                if self.board[new_position[0]][new_position[1]] is not None and self.board[new_position[0]][new_position[1]].color == "black":
-                    # If the new position is filled with a piece of the opposite color, kill it
-                    self.board[new_position[0]][new_position[1]].is_alive = False
-                    print(f"You killed a {self.board[new_position[0]][new_position[1]].color} {self.board[new_position[0]][new_position[1]].type}")
+    def is_valid_move(self, new_position, board):
+        # Calculate the difference in position
+        dx = abs(new_position[0] - self.position[0])
+        dy = abs(new_position[1] - self.position[1])
 
-            self.position = new_position
+        # Kings can move one step in any direction (horizontally, vertically, or diagonally)
+        if dx <= 1 and dy <= 1:
+            # Check if the target position is empty or contains an opponent's piece
+            target_piece = board[new_position[0]][new_position[1]]
+            if target_piece is None or target_piece.color != self.color:
+                return True
 
-            # Update the board
-            self.board[new_position[0]][new_position[1]] = self
-            self.board[self.position[0]][self.position[1]] = None
-            self.board.redraw()
-            
-            # Change turn
-            self.current_player.change_turn(self.other_player)
-
-            return True
         return False

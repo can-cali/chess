@@ -15,26 +15,42 @@ class Board:
 
         # add pawns
         for i in range(8):
-            board[1][i] = Pawn("white", (1, i))
-            board[6][i] = Pawn("black", (6, i))
+            board[1][i] = Pawn("black", (1, i))
+            board[6][i] = Pawn("white", (6, i))
         
         # add other pieces
         piece_order = [Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook]
         for i, piece_class in enumerate(piece_order):
-            board[0][i] = piece_class("white", (0, i))
-            board[7][i] = piece_class("black", (7, i))
+            board[0][i] = piece_class("black", (0, i))
+            board[7][i] = piece_class("white", (7, i))
         
         return board
     
     def __draw_board(self):
+        # Print column labels
+        print("   a  b  c  d  e  f  g  h")
+        print("  ------------------------")
+
         for i in range(8):
+            # Print row number
+            print(f"{8-i}|", end=" ")
+
             for j in range(8):
                 if self.board[i][j] is None:
                     print("--", end=" ")
                 else:
-                    print(str(self.board[i][j])[:2], end=" ")  # Print first two characters of piece string representation
-            print()
-    
+                    if self.board[i][j].color == "black":
+                        print(str(self.board[i][j])[:2].lower(), end=" ")
+                    else:
+                        print(str(self.board[i][j])[:2].upper(), end=" ")
+            
+            # Print row number again at the end of the row
+            print(f"|{8-i}")
+
+        # Print bottom border and column labels again
+        print("  ------------------------")
+        print("   a  b  c  d  e  f  g  h")
+        
     def get_piece(self, position):
         return self.board[position[0]][position[1]]
     
